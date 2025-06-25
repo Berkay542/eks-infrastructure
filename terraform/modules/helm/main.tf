@@ -102,3 +102,57 @@ resource "helm_release" "cert_manager" {
 
 ## Cert-Manager is installed via Helm in this module to automate TLS certificates for ingress SSL termination. 
 ## You must configure ClusterIssuer or Issuer resources to enable Let's Encrypt integration. /kubernetes/cluster-issuer.yaml
+
+
+
+resource "helm_release" "prometheus" {
+  provider   = helm.eks
+
+  name       = "prometheus"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "kube-prometheus-stack"
+  version    = "45.6.0"  # Use latest stable version
+
+  namespace  = "monitoring"
+  create_namespace = true
+
+  values = [
+    file("${path.module}/values/prometheus-values.yaml")
+  ]
+}
+
+
+
+resource "helm_release" "grafana" {
+  provider   = helm.eks
+
+  name       = "grafana"
+  repository = "https://grafana.github.io/helm-charts"
+  chart      = "grafana"
+  version    = "6.17.4"  # Check for latest version
+
+  namespace  = "monitoring"
+  create_namespace = false
+
+  values = [
+    file("${path.module}/values/grafana-values.yaml")
+  ]
+}
+
+
+
+resource "helm_release" "node_exporter" {
+  provider   = helm.eks
+
+  name       = "node-exporter"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "prometheus-node-exporter"
+  version    = "4.24.0" # Use latest stable
+
+  namespace  = "monitoring"
+  create_namespace = true
+
+  values = [
+    file("${path.module}/values/node-exporter-values.yaml")
+  ]
+}
