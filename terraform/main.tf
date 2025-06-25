@@ -12,7 +12,7 @@ module "vpc" {
 
 
 module "eks" {
-  source = "./modules/eks"
+  source = "../modules/eks"
 
   env                   = var.env
   eks_name              = var.eks_name
@@ -48,7 +48,7 @@ module "node_groups" {
 
 
 module "helm" {
-  source = "./modules/helm"
+  source = "../modules/helm"
 
   cluster_name           = module.eks.cluster_name
   cluster_endpoint       = module.eks.cluster_endpoint
