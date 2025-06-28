@@ -57,3 +57,12 @@ module "helm" {
   region                 = var.region
   vpc_id                 = module.vpc.vpc_id
 }
+
+
+module "security_groups" {
+  source = "./modules/security-groups"
+
+  env                  = var.env
+  vpc_id               = module.vpc.vpc_id
+  private_subnet_cidrs = module.vpc.private_subnet_cidrs
+}
