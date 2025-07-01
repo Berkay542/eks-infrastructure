@@ -30,3 +30,10 @@ spec:
                 name: opentelemetry-demo-cartservice
                 port:
                   number: 8080
+          - path: /checkout
+            pathType: Prefix
+            backend:
+              service:
+                name: opentelemetry-demo-checkoutservice
+                port:
+                  number: 8080
