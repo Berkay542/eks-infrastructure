@@ -20,25 +20,16 @@ resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"
   repository = "https://kubernetes.github.io/ingress-nginx"
   chart      = "ingress-nginx"
-  version    = "4.7.1"
+  version    = "4.10.1"
 
   namespace  = "ingress-nginx"
-
   create_namespace = true
 
-  provider = helm.eks
+  values = [file("${path.modules}/values/nginx-ingres.yaml")]
 
-
-  set {
-    name  = "controller.service.type"
-    value = "LoadBalancer"
-  }
-
-  set {
-    name  = "controller.replicaCount"
-    value = 2
-  }
+  depends_on = [ helm_release.aws_lb_controller ]
 }
+
 
 # -- AWS Load Balancer Controller --
 
@@ -84,7 +75,7 @@ resource "helm_release" "cert_manager" {
   name       = "cert-manager"
   repository = "https://charts.jetstack.io"
   chart      = "cert-manager"
-  version    = "v1.12.0"   # check for latest stable version
+  version    = "v1.14.5"   # check for latest stable version
 
   namespace  = "cert-manager"
   create_namespace = true
@@ -94,10 +85,7 @@ resource "helm_release" "cert_manager" {
     value = true
   }
 
-  set {
-    name  = "global.leaderElection.namespace"
-    value = "cert-manager"
-  }
+  depends_on = [ helm_release.nginx_ingress ]
 }
 
 ## Cert-Manager is installed via Helm in this module to automate TLS certificates for ingress SSL termination. 
