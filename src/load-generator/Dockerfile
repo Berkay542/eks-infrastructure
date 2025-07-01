@@ -1,7 +1,3 @@
-# Copyright The OpenTelemetry Authors
-# SPDX-License-Identifier: Apache-2.0
-
-
 FROM python:3.12-slim-bookworm AS base
 
 FROM base AS builder
