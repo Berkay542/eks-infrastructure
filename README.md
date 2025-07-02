@@ -17,7 +17,7 @@ Because it:
 - Is optimized for internal communication (inside Kubernetes) where speed matters more than human readability.
 
 [![Architecture of
-microservices](myapp/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+microservices](myapp/docs/img/architecture-diagram.png)](my-app/docs/img/architecture-diagram.png)
 
 Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
