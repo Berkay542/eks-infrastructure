@@ -17,7 +17,7 @@ Because it:
 - Is optimized for internal communication (inside Kubernetes) where speed matters more than human readability.
 
 [![Architecture of
-microservices](/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
+microservices](myapp/docs/img/architecture-diagram.png)](/docs/img/architecture-diagram.png)
 
 Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
@@ -39,7 +39,7 @@ Find **Protocol Buffers Descriptions** at the [`./protos` directory](/protos).
 
 | Home Page                                                                                                         | Checkout Screen                                                                                                    |
 | ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| [![Screenshot of store homepage](/docs/img/online-boutique-frontend-1.png)](/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](/docs/img/online-boutique-frontend-2.png)](/docs/img/online-boutique-frontend-2.png) |
+| [![Screenshot of store homepage](my-app/docs/img/online-boutique-frontend-1.png)](my-app/docs/img/online-boutique-frontend-1.png) | [![Screenshot of checkout screen](my-app/docs/img/online-boutique-frontend-2.png)](my-app/docs/img/online-boutique-frontend-2.png) |
 
 
 
