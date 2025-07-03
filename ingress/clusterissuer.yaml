@@ -6,7 +6,7 @@ spec:
   acme:
     # Let's Encrypt production ACME server URL
     server: https://acme-v02.api.letsencrypt.org/directory
-    email: your-email@example.com   # Replace with your email
+    email: your-email@example.com   # Replace your email
     privateKeySecretRef:
       name: http-01-production-cluster-issuer
     solvers:
