@@ -144,3 +144,32 @@ resource "helm_release" "node_exporter" {
     file("${path.module}/values/node-exporter-values.yaml")
   ]
 }
+
+### Redis 
+
+resource "helm_release" "redis" {
+  name       = "redis"
+  namespace  = "default"
+  repository = "https://charts.bitnami.com/bitnami"
+  chart      = "redis"
+  version    = "19.5.4" # or the latest tested version
+
+  values = [file("${path.module}/values/redis-values.yaml")]
+
+  set {
+    name  = "auth.enabled"
+    value = "false"
+  }
+
+  set {
+    name  = "architecture"
+    value = "standalone"
+  }
+
+  set {
+    name  = "master.persistence.enabled"
+    value = "false"
+  }
+
+  depends_on = [module.eks]
+}
