@@ -173,3 +173,75 @@ resource "helm_release" "redis" {
 
   depends_on = [module.eks]
 }
+
+
+
+
+### ArgoCD
+
+# helm install argocd -n argocd --create-namespace argo/argo-cd --version 7.3.11 -f terraform/values/argocd.yaml
+resource "helm_release" "argocd" {
+  name = "argocd"
+
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = "argocd"
+  create_namespace = true
+  version          = "7.3.11"
+
+  values = [file("values/argocd.yaml")]
+
+  depends_on = [module.eks]
+}
+
+
+
+
+## Image Updater for ArgoCD
+
+data "aws_iam_policy_document" "argocd_image_updater" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
+
+resource "aws_iam_role" "argocd_image_updater" {
+  name               = "${var.cluster_name}-argocd-image-updater"
+  assume_role_policy = data.aws_iam_policy_document.argocd_image_updater.json
+}
+
+resource "aws_iam_role_policy_attachment" "argocd_image_updater" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.argocd_image_updater.name
+}
+
+resource "aws_eks_pod_identity_association" "argocd_image_updater" {
+  cluster_name    = var.cluster_name
+  namespace       = "argocd"
+  service_account = "argocd-image-updater"
+  role_arn        = aws_iam_role.argocd_image_updater.arn
+}
+
+resource "helm_release" "updater" {
+  name = "updater"
+
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argocd-image-updater"
+  namespace        = "argocd"
+  create_namespace = true
+  version          = "0.11.0"
+
+  values = [file("values/image-updater.yaml")]
+
+  depends_on = [helm_release.argocd]
+}
