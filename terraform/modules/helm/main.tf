@@ -107,6 +107,7 @@ resource "helm_release" "prometheus" {
   values = [
     file("${path.module}/values/prometheus-values.yaml")
   ]
+  depends_on = [module.eks]
 }
 
 
@@ -125,6 +126,7 @@ resource "helm_release" "grafana" {
   values = [
     file("${path.module}/values/grafana-values.yaml")
   ]
+  depends_on = [module.eks]
 }
 
 
@@ -143,6 +145,7 @@ resource "helm_release" "node_exporter" {
   values = [
     file("${path.module}/values/node-exporter-values.yaml")
   ]
+  depends_on = [module.eks]
 }
 
 ### Redis 
