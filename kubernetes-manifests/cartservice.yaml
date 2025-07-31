@@ -1,8 +1,14 @@
-
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cartservice
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: cartservice
+  namespace: cartservice
   labels:
     app: cartservice
 spec:
@@ -72,11 +78,13 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: cartservice
+  namespace: cartservice
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: redis-cart
+  namespace: cartservice
   labels:
     app: redis-cart
 spec:
@@ -131,6 +139,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: redis-cart
+  namespace: cartservice
   labels:
     app: redis-cart
 spec:

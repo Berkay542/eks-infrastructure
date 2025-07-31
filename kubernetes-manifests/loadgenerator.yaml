@@ -1,8 +1,14 @@
-
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: loadgeneratorservice
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: loadgenerator
+  namespace: loadgeneratorservice
   labels:
     app: loadgenerator
 spec:
@@ -85,3 +91,4 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: loadgenerator
+  namespace: loadgeneratorservice

@@ -176,3 +176,163 @@ resource "aws_eks_addon" "pod_identity" {
   addon_version = "v1.3.0-eksbuild.1"
   
 }
+
+
+
+## helm resources
+
+
+
+
+###    AWS Load balancer controller
+
+
+data "aws_iam_policy_document" "aws_lbc" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
+
+resource "aws_iam_role" "aws_lbc" {
+  name               = "${aws_eks_cluster.eks.name}-aws-lbc"
+  assume_role_policy = data.aws_iam_policy_document.aws_lbc.json
+}
+
+resource "aws_iam_policy" "aws_lbc" {
+  policy = file("./iam/AWSLoadBalancerController.json")
+  name   = "AWSLoadBalancerController"
+}
+
+resource "aws_iam_role_policy_attachment" "aws_lbc" {
+  policy_arn = aws_iam_policy.aws_lbc.arn
+  role       = aws_iam_role.aws_lbc.name
+}
+
+resource "aws_eks_pod_identity_association" "aws_lbc" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
+  namespace       = "kube-system"
+  service_account = "aws-load-balancer-controller"
+  role_arn        = aws_iam_role.aws_lbc.arn
+}
+
+resource "helm_release" "aws_lbc" {
+  name = "aws-load-balancer-controller"
+
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-load-balancer-controller"
+  namespace  = "kube-system"
+  version    = "1.8.1"
+
+  set {
+    name  = "clusterName"
+    value = aws_eks_cluster.eks_cluster.name
+  }
+
+  set {
+    name  = "serviceAccount.name"
+    value = "aws-load-balancer-controller"
+  }
+
+  set {
+    name  = "vpcId"
+    value = var.vpc_id
+  }
+
+  depends_on = [helm_release.cluster_autoscaler]
+}
+
+
+
+## metrics server
+resource "helm_release" "metrics_server" {
+
+  name       = "metrics-server"
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
+  chart      = "metrics-server"
+  version    = "5.12.2"  # Check latest version
+
+  namespace  = "kube-system"
+  create_namespace = false
+}
+
+# metric server is not built-in with EKS, you must install additionally.
+
+
+### ArgoCD
+
+# helm install argocd -n argocd --create-namespace argo/argo-cd --version 7.3.11 -f terraform/values/argocd.yaml
+resource "helm_release" "argocd" {
+  name = "argocd"
+
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argo-cd"
+  namespace        = "argocd"
+  create_namespace = true
+  version          = "7.3.11"
+
+  values = [file("values/argocd.yaml")]
+
+  depends_on = [module.eks]
+}
+
+
+
+
+## Image Updater for ArgoCD
+
+data "aws_iam_policy_document" "argocd_image_updater" {
+  statement {
+    effect = "Allow"
+
+    principals {
+      type        = "Service"
+      identifiers = ["pods.eks.amazonaws.com"]
+    }
+
+    actions = [
+      "sts:AssumeRole",
+      "sts:TagSession"
+    ]
+  }
+}
+
+resource "aws_iam_role" "argocd_image_updater" {
+  name               = "${aws_eks_cluster.eks_cluster.name}-argocd-image-updater"
+  assume_role_policy = data.aws_iam_policy_document.argocd_image_updater.json
+}
+
+resource "aws_iam_role_policy_attachment" "argocd_image_updater" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+  role       = aws_iam_role.argocd_image_updater.name
+}
+
+resource "aws_eks_pod_identity_association" "argocd_image_updater" {
+  cluster_name    = aws_eks_cluster.eks_cluster.name
+  namespace       = "argocd"
+  service_account = "argocd-image-updater"
+  role_arn        = aws_iam_role.argocd_image_updater.arn
+}
+
+resource "helm_release" "updater" {
+  name = "updater"
+
+  repository       = "https://argoproj.github.io/argo-helm"
+  chart            = "argocd-image-updater"
+  namespace        = "argocd"
+  create_namespace = true
+  version          = "0.11.0"
+
+  values = [file("values/image-updater.yaml")]
+
+  depends_on = [helm_release.argocd]
+}

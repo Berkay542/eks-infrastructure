@@ -1,8 +1,14 @@
-
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: adservice
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: adservice
+  namespace: adservice
   labels:
     app: adservice
 spec:
@@ -58,6 +64,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: adservice
+  namespace: adservice
   labels:
     app: adservice
 spec:
@@ -73,3 +80,4 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: adservice
+  namespace: adservice
