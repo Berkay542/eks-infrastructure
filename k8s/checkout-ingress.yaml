@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: checkout-ingress
+  namespace: checkoutservice
+  annotations:
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:<account-id>:certificate/<cert-id>
+    alb.ingress.kubernetes.io/healthcheck-path: /health
+    alb.ingress.kubernetes.io/group.name: public-apps  #to use shared ALB
+spec:
+  rules:
+  - host: shop.example.com
+    http:
+      paths:
+      - path: /checkout
+        pathType: Prefix
+        backend:
+          service:
+            name: checkoutservice
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - shop.example.com
+    secretName: shop-tls
