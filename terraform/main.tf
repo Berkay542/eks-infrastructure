@@ -47,17 +47,6 @@ module "node_groups" {
 }
 
 
-module "helm" {
-  source = "../modules/helm"
-
-  cluster_name           = module.eks.cluster_name
-  cluster_endpoint       = module.eks.cluster_endpoint
-  cluster_ca_certificate = module.eks.cluster_certificate_authority_data
-  k8s_token              = data.aws_eks_cluster_auth.token.token
-  region                 = var.region
-  vpc_id                 = module.vpc.vpc_id
-}
-
 
 module "security_groups" {
   source = "./modules/security-groups"
